@@ -1,0 +1,31 @@
+
+{% block title %} корзина {% endblock %}
+
+{% block content %}
+    {{ order }}
+    {% for item in order.items.all %}
+        <h1>{{ item.name }} {{ item.id }}</h1>
+        <p>Description</p>
+        <p>{{ item.description }}</p>
+
+        <p>Цена {{ item.price }} {{ item.currency }}</p>
+    {% endfor %}
+    <button id="buy-button">Buy</button>
+
+    <script src="https://js.stripe.com/v3/"></script>
+
+    <script type="text/javascript">
+      var stripe = Stripe('{{stripe_publishable_key}}');
+
+      var buyButton = document.getElementById('buy-button');
+      buyButton.addEventListener('click', function() {
+        // Create a new Checkout Session using the server-side endpoint
+        // Redirect to Stripe Session Checkout
+        fetch('/buy_order/{{ order.id }}/', {method: 'GET'})
+        .then(response => response.json())
+        .then(session => stripe.redirectToCheckout({ sessionId: session.session_id }))
+        .catch(err => console.error("Ошибка при покупке:", err));
+      });
+    </script>
+{% endblock %}
+
